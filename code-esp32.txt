@@ -1,0 +1,55 @@
+#include "DHT.h" // Thư viện DHT22
+
+// Khai báo các chân cho cảm biến MQ2
+const int analogPin = 34;
+const int digitalPin = 18;
+
+// Khai báo các chân cho cảm biến DHT22
+#define DHTPIN 4     // Chân GPIO4
+#define DHTTYPE DHT22   // Loại cảm biến là DHT22
+DHT dht(DHTPIN, DHTTYPE); // Khởi tạo đối tượng DHT
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(digitalPin, INPUT);
+  dht.begin(); // Khởi tạo cảm biến DHT22
+  Serial.println("Hệ thống giám sát môi trường khởi động!");
+}
+
+void loop() {
+  // --- Đọc dữ liệu từ cảm biến MQ2 ---
+  int analogValue = analogRead(analogPin);
+  int digitalValue = digitalRead(digitalPin);
+  
+  // --- Đọc dữ liệu từ cảm biến DHT22 ---
+  // Đọc nhiệt độ và độ ẩm
+  float humidity = dht.readHumidity();
+  float temperature = dht.readTemperature();
+
+  // Kiểm tra xem việc đọc có thành công không
+  if (isnan(humidity) || isnan(temperature)) {
+    Serial.println("Lỗi đọc dữ liệu từ cảm biến DHT!");
+  } else {
+    // In ra màn hình Serial Monitor
+    Serial.println("------------------------------------");
+    Serial.print("Nhiệt độ: ");
+    Serial.print(temperature);
+    Serial.println(" *C");
+    Serial.print("Độ ẩm: ");
+    Serial.print(humidity);
+    Serial.println(" %");
+  }
+
+  Serial.print("Gia tri analog MQ2: ");
+  Serial.print(analogValue);
+  Serial.print(" | ");
+  Serial.print("Trạng thái digital MQ2: ");
+  if (digitalValue == HIGH) {
+    Serial.println("Phát hiện khí gas!");
+  } else {
+    Serial.println("Không có khí gas.");
+  }
+  Serial.println("------------------------------------");
+  
+  delay(2000); // Đợi 2 giây trước lần đọc tiếp theo
+}
